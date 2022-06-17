@@ -7,7 +7,7 @@
 1. 下载扩展源码
 
 ```shell
-git clone https://github.com/idoubi/sql2struct.git
+git clone https://github.com/math-chao/sql2struct.git
 ```
 
 2. 安装扩展
