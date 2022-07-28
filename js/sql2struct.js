@@ -12,6 +12,7 @@ new Vue({
             useSqlx: false,
             useXorm: false,
             useJson: true,
+            jsonCamel:false,
             useForm: false,
             dialogFormVisible: false
         }
@@ -32,6 +33,7 @@ new Vue({
                         useSqlx: that.useSqlx,
                         useXorm: that.useXorm,
                         useJson: that.useJson,
+                        jsonCamel:that.jsonCamel,
                         useForm: that.useForm,
                         typeMap: that.typeMap
                     }
@@ -53,6 +55,9 @@ new Vue({
                 }
                 if (obj.useJson != undefined) {
                     that.useJson = obj.useJson
+                }
+                if (obj.jsonCamel != undefined) {
+                    that.jsonCamel = obj.jsonCamel
                 }
                 if (obj.useForm != undefined) {
                     that.useForm = obj.useForm
@@ -94,7 +99,7 @@ new Vue({
                         return
                     }
                 } else {  // 数据表字段
-                    var field = res[i].match(/\`(.+)\`\s+(tinyint|smallint|int|mediumint|bigint|float|double|decimal|varchar|char|text|mediumtext|longtext|datetime|time|date|enum|set|blob|timestamp)?(\(.+\))?.+/)
+                    var field = res[i].match(/\`(.+)\`\s+(tinyint|smallint|int|mediumint|bigint|float|double|decimal|varchar|char|json|text|mediumtext|longtext|datetime|time|date|enum|set|blob|timestamp)?(\(.+\))?.+/)
                     if (field && field[1] != undefined && field[2] != undefined) {
                         if (types[field[2]] != undefined) {
                             var fieldName = titleCase(field[1])
@@ -115,7 +120,11 @@ new Vue({
                                 structArr.push('xorm:"'+ fieldJsonName +'"')
                             }
                             if (this.useJson) {
-                                structArr.push('json:"' + fieldJsonName + '"')
+                                if (this.jsonCamel){
+                                    structArr.push('json:"' + camel(fieldJsonName) + '"')
+                                }else{
+                                    structArr.push('json:"' + fieldJsonName + '"')
+                                }
                             }
                             if (this.useForm) {
                                 structArr.push('form:"' + fieldJsonName + '"')
@@ -252,6 +261,20 @@ function titleCase(str) {
   return string;
 }
 
+// 下划线转驼峰
+function camel(str) {
+  var array = str.toLowerCase().split("_");
+  for (var i = 0; i < array.length; i++){
+   if (i == 0){
+    continue
+   }
+    array[i] = array[i][0].toUpperCase() + array[i].substring(1, array[i].length);
+  }
+  var string = array.join("");
+
+  return string;
+}
+
 // 类型映射
 function getTypeMap() {
     return {
@@ -268,6 +291,7 @@ function getTypeMap() {
         'text': 'string',
         'mediumtext': 'string',
         'longtext': 'string',
+        'json':'string',
         'time': 'time.Time',
         'date': 'time.Time',
         'datetime': 'time.Time',
